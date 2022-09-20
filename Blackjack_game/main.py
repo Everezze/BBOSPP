@@ -29,7 +29,6 @@ def main():
 
     while PLAYERS_TURN:
 
-
         if len(PLAYERS_NUMBER[PLAYERS_TURN]) == 2:
             for option in PLAYER_ADDITIONAL_OPTIONS:
                 if option == '(Sp)lit' and len(set(list(zip(*PLAYERS_NUMBER[PLAYERS_TURN]))[0])) !=1:
@@ -42,20 +41,31 @@ def main():
         print(f"Player {PLAYERS_TURN} turn. {', '.join(PLAYER_OPTIONS)}.")
         player_move= input("> ")
 
-        if player_move.lower() == 'h' or player_move.lower() == 'hit':
+        if player_move.lower() in ('h','hit') and player_move in PLAYER_OPTIONS:
             PLAYERS_NUMBER[PLAYERS_TURN].append(deck.pop(0))
+        elif player_move.lower() in ('st','stand') and player_move in PLAYER_OPTIONS:
+            continue
+        elif player_move.lower() in ('do','double') and player_move in PLAYER_OPTIONS:
+            if PLAYERS_MONEY[PLAYERS_TURN] >= PLAYER_BET * 2:
+                PLAYER_BET *=2
+                PLAYERS_NUMBER[PLAYERS_TURN].append(deck.pop(0))
+        elif player_move.lower() in ('sur','surrender') and player_move in PLAYER_OPTIONS:
+            PLAYERS_MONEY[PLAYERS_TURN] = PLAYER_BET / 2
+        elif player_move.lower() in ('sp','split') and player_move in PLAYER_OPTIONS:
+            if len(set(list(zip(*PLAYERS_NUMBER[PLAYERS_TURN]))[0])) ==1:
+                # add another hand to the player, either separately or in the
+                # same hand
+                ...
 
-        card_sum = sum(list(zip(*PLAYERS_NUMBER[PLAYERS_TURN]))[0])
+        card_sum = get_cards_value(PLAYERS_NUMBER[PLAYERS_TURN])
         if card_sum >21:
             print("Bust! You lost your bet,try another time")
             PLAYERS_MONEY[PLAYERS_TURN] = PLAYERS_MONEY[PLAYERS_TURN] - PLAYER_BET
             if PLAYERS_NUMBER[PLAYERS_TURN] == PLAYERS_NUMBER[-1]:
-                PLAYERS_TURN = 0
                 break
             else:
                 PLAYERS_TURN +=1
                 PLAYER_BET =get_bet(PLAYERS_TURN,PLAYERS_MONEY)
-                continue
 
 
 def make_deck(*forms):
@@ -78,7 +88,7 @@ def get_bet(player_turn, player_money):
     while True:
         PLAYER_BET =input(f"Player {player_turn},Amount you're betting: ")
         if PLAYER_BET.isnumeric() and int(PLAYER_BET) <= player_money[player_turn]:
-            return PLAYER_BET
+            return int(PLAYER_BET)
         elif PLAYER_BET.isnumeric() and int(PLAYER_BET) > player_money[player_turn]:
             print("You\'re betting money you don't have in your treasury")
         else:
