@@ -37,36 +37,20 @@ def main():
         else:
             PLAYER_OPTIONS = [x for x in PLAYER_OPTIONS if x not in PLAYER_ADDITIONAL_OPTIONS]
 
-        #check player cards for double, split and surrender option
-        print(f"Player {PLAYERS_TURN} turn. {', '.join(PLAYER_OPTIONS)}.")
-        player_move= input("> ")
-
-        if player_move.lower() in ('h','hit') and player_move in PLAYER_OPTIONS:
-            PLAYERS_NUMBER[PLAYERS_TURN].append(deck.pop(0))
-        elif player_move.lower() in ('st','stand') and player_move in PLAYER_OPTIONS:
-            continue
-        elif player_move.lower() in ('do','double') and player_move in PLAYER_OPTIONS:
-            if PLAYERS_MONEY[PLAYERS_TURN] >= PLAYER_BET * 2:
-                PLAYER_BET *=2
-                PLAYERS_NUMBER[PLAYERS_TURN].append(deck.pop(0))
-        elif player_move.lower() in ('sur','surrender') and player_move in PLAYER_OPTIONS:
-            PLAYERS_MONEY[PLAYERS_TURN] = PLAYER_BET / 2
-        elif player_move.lower() in ('sp','split') and player_move in PLAYER_OPTIONS:
-            if len(set(list(zip(*PLAYERS_NUMBER[PLAYERS_TURN]))[0])) ==1:
-                # add another hand to the player, either separately or in the
-                # same hand
-                ...
+        check_and_process_move(PLAYERS_NUMBER,PLAYERS_TURN,PLAYER_OPTIONS,PLAYERS_MONEY,PLAYER_BET,deck)
 
         card_sum = get_cards_value(PLAYERS_NUMBER[PLAYERS_TURN])
         if card_sum >21:
             print("Bust! You lost your bet,try another time")
             PLAYERS_MONEY[PLAYERS_TURN] = PLAYERS_MONEY[PLAYERS_TURN] - PLAYER_BET
-            if PLAYERS_NUMBER[PLAYERS_TURN] == PLAYERS_NUMBER[-1]:
-                break
-            else:
-                PLAYERS_TURN +=1
-                PLAYER_BET =get_bet(PLAYERS_TURN,PLAYERS_MONEY)
 
+        if PLAYERS_NUMBER[PLAYERS_TURN] == PLAYERS_NUMBER[-1]:
+            break
+        else:
+            PLAYERS_TURN +=1
+            PLAYER_BET =get_bet(PLAYERS_TURN,PLAYERS_MONEY)
+
+    #now make the dealer draw cards until he's above 17
 
 def make_deck(*forms):
 
@@ -110,6 +94,37 @@ def get_cards_value(hand):
             total +=value
 
     return total
+
+
+def check_and_process_move(players_number,players_turn,player_options,players_money,player_bet,deck):
+
+    #check player cards for double, split and surrender option
+    print(f"Player {players_turn} turn. {', '.join(player_options)}.")
+
+    while True:
+        player_move= input("> ")
+
+        if player_move.lower() in ('h','hit') and player_move in player_options:
+            players_number[players_turn].append(deck.pop(0))
+            break
+        elif player_move.lower() in ('st','stand','s') and player_move in player_options:
+            break
+        elif player_move.lower() in ('do','double','d') and player_move in player_options:
+            if players_money[players_turn] >= player_bet * 2:
+                player_bet *=2
+                players_number[players_turn].append(deck.pop(0))
+            break
+        elif player_move.lower() in ('sur','surrender') and player_move in player_options:
+            players_money[players_turn] = player_bet / 2
+            break
+        elif player_move.lower() in ('sp','split') and player_move in player_options:
+            if len(set(list(zip(*players_number[players_turn]))[0])) ==1:
+                # add another hand to the player, either separately or in the
+                # same hand
+                ...
+            break
+        else:
+            print('Please insert a valid option.')
 
 
 main()
