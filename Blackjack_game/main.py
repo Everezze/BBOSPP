@@ -31,20 +31,10 @@ def main():
         CURRENT_BET =get_bet(PLAYERS_TURN,PLAYERS_MONEY)
         PLAYERS_BET.append(CURRENT_BET)
 
-        if len(PLAYERS_NUMBER[PLAYERS_TURN]) == 2:
-            for option in PLAYER_ADDITIONAL_OPTIONS:
-                if option == '(Sp)lit' and len(set(list(zip(*PLAYERS_NUMBER[PLAYERS_TURN]))[0])) !=1:
-                    continue
-                PLAYER_OPTIONS.append(option)
-        else:
-            PLAYER_OPTIONS = [x for x in PLAYER_OPTIONS if x not in PLAYER_ADDITIONAL_OPTIONS]
 
-        check_and_process_move(PLAYERS_NUMBER,PLAYERS_TURN,PLAYER_OPTIONS,PLAYERS_MONEY,CURRENT_BET,deck)
+        check_and_process_move(PLAYERS_NUMBER,PLAYERS_TURN,PLAYER_OPTIONS,PLAYERS_MONEY,CURRENT_BET,deck,PLAYERS_BET,PLAYER_ADDITIONAL_OPTIONS)
+        #print(f"Player\'s hand: {display_cards()}")
 
-        card_sum = get_cards_value(PLAYERS_NUMBER[PLAYERS_TURN])
-        if card_sum >21:
-            print("Bust! You lost your bet,try another time")
-            PLAYERS_MONEY[PLAYERS_TURN] -=  CURRENT_BET
 
         if PLAYERS_NUMBER[PLAYERS_TURN] == PLAYERS_NUMBER[-1]:
             PLAYERS_TURN=0
@@ -56,9 +46,14 @@ def main():
     while get_cards_value(PLAYERS_NUMBER[PLAYERS_TURN]) < 17:
         PLAYERS_NUMBER[PLAYERS_TURN].append(deck.pop(0))
 
+    #print(f"Dealer\'s hand: {display_cards()}")
+
     if get_cards_value(PLAYERS_NUMBER[PLAYERS_TURN]) > 21:
+        #display dealer's cards
+        #print(f'dealer busted!')
         for player in range(1,len(PLAYERS_NUMBER)):
             if get_cards_value(PLAYERS_NUMBER[player]) <=21:
+                #display player hand and tell how much he earned
                 PLAYERS_MONEY[player] += PLAYERS_BET[player]
     else:
         for player in range(1,len(PLAYERS_NUMBER)):
@@ -116,31 +111,50 @@ def get_cards_value(hand):
     return total
 
 
-def check_and_process_move(players_number,players_turn,player_options,players_money,player_bet,deck):
+def check_and_process_move(players_number,players_turn,player_options,players_money,player_bet,deck,players_bet,player_additional_options):
 
     #check player cards for double, split and surrender option
     print(f"Player {players_turn} turn. {', '.join(player_options)}.")
 
     while True:
+
+        if get_cards_value(players_number[players_turn])>21:
+            print("Bust! You lost your bet,try another time")
+            players_money[players_turn] -=  player_bet
+            break
+        
+        # add player options and change accordingly
+        if len(players_number[players_turn]) == 2:
+            for option in player_additional_options:
+                if option == '(Sp)lit' and len(set(list(zip(*players_number[players_turn]))[0])) !=1:
+                    continue
+                player_options.append(option)
+        else:
+            player_options = [x for x in player_options if x not in player_additional_options]
+
         player_move= input("> ")
 
         if player_move.lower() in ('h','hit') and player_move in player_options:
             players_number[players_turn].append(deck.pop(0))
-            break
+            #print(f"Player\'s hand: {display_cards()}")
         elif player_move.lower() in ('st','stand','s') and player_move in player_options:
             break
         elif player_move.lower() in ('do','double','d') and player_move in player_options:
+            #print(f"Player\'s hand: {display_cards()}")
             if players_money[players_turn] >= player_bet * 2:
                 player_bet *=2
+                players_bet[players_turn]= player_bet
                 players_number[players_turn].append(deck.pop(0))
             break
         elif player_move.lower() in ('sur','surrender') and player_move in player_options:
-            players_money[players_turn] = player_bet / 2
+            players_money[players_turn] -= player_bet / 2
+            players_bet[players_turn]= player_bet/2
             break
         elif player_move.lower() in ('sp','split') and player_move in player_options:
             if len(set(list(zip(*players_number[players_turn]))[0])) ==1:
                 # add another hand to the player, either separately or in the
                 # same hand
+                #print(f"Player\'s hand: {display_cards()}")
                 ...
             break
         else:
