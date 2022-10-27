@@ -113,8 +113,6 @@ def get_cards_value(hand):
 
 def check_and_process_move(players_number,players_turn,player_options,players_money,player_bet,deck,players_bet,player_additional_options):
 
-    #check player cards for double, split and surrender option
-    print(f"Player {players_turn} turn. {', '.join(player_options)}.")
 
     while True:
 
@@ -124,6 +122,7 @@ def check_and_process_move(players_number,players_turn,player_options,players_mo
             break
         
         # add player options and change accordingly
+        #check player cards for double, split and surrender option
         if len(players_number[players_turn]) == 2:
             for option in player_additional_options:
                 if option == '(Sp)lit' and len(set(list(zip(*players_number[players_turn]))[0])) !=1:
@@ -132,6 +131,7 @@ def check_and_process_move(players_number,players_turn,player_options,players_mo
         else:
             player_options = [x for x in player_options if x not in player_additional_options]
 
+        print(f"Player {players_turn} turn. {', '.join(player_options)}.")
         player_move= input("> ")
 
         if player_move.lower() in ('h','hit') and player_move in player_options:
@@ -149,14 +149,14 @@ def check_and_process_move(players_number,players_turn,player_options,players_mo
         elif player_move.lower() in ('sur','surrender') and player_move in player_options:
             players_money[players_turn] -= player_bet / 2
             players_bet[players_turn]= player_bet/2
+            print(f"Player {players_turn}, you lost half of your bet by surrendering")
             break
         elif player_move.lower() in ('sp','split') and player_move in player_options:
-            if len(set(list(zip(*players_number[players_turn]))[0])) ==1:
-                # add another hand to the player, either separately or in the
-                # same hand
-                #print(f"Player\'s hand: {display_cards()}")
-                ...
-            break
+            # add another hand to the player, either separately or in the  same hand
+            #draw cards until len() ==2 for both hands
+            # display hands with print(f"Player\'s hand: {display_cards()}")
+            ...
+            
         else:
             print('Please insert a valid option.')
 
