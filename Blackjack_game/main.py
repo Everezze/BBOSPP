@@ -30,6 +30,7 @@ def main():
         while cards_to_distribute:
             PLAYERS[i]['hand'].append(deck.pop())
             cards_to_distribute -=1
+    PLAYERS[0]['hidden_card'] = True
         #else:
             #PLAYERS[i]['hand'] = []
             #cards_to_distribute = 2
@@ -67,6 +68,7 @@ def main():
             PLAYERS_TURN=0
             #break
 
+    PLAYERS[PLAYERS_TURN]['hidden_card'] = False
     #now make the dealer draw cards until he's above 17
     while get_cards_value(PLAYERS[PLAYERS_TURN]['hand']) < 17:
         PLAYERS[PLAYERS_TURN]['hand'].append(deck.pop(0))
@@ -226,21 +228,24 @@ def display_hands(players,players_turn=False,display_all=False):
                     #print("|".rjust(7) + "{current_hand[drawing_component][0]}")
                     #print("|".rjust(7) , ["{current_hand[z][0]}" for z in range(0,total_cards)])
                     #print("".rjust(7) , "  ".join(["{current_hand[z][0]}  |" for z in range(0,total_cards)]))
-                    print("".rjust(15) , "  ".join([f"|{current_hand[z][0]}  |" for z in range(0,len(current_hand))]),
+                    print("".rjust(15) , "  ".join([f"|{current_hand[z][0]}  |"
+                          if not players.get('hidden_card') else '|#  |' for z in range(0,len(current_hand))]),
                           "".rjust(15) , "  ".join([f"|{current_split[z][0]} |" for z in range(0,len(current_split)) if current_split]))
                     #if current_split:
                         #print("".rjust(6) , "  ".join([f"|{current_split[z][0]} |" for z in range(0,len(current_split))]))
                     top_side_card = False
                     middle_side_card=True
                 elif middle_side_card:
-                    print("".rjust(15) , "  ".join([f"| {current_hand[z][1]} |" for z in range(0,len(current_hand))]),
+                    print("".rjust(15) , "  ".join([f"| {current_hand[z][1]} |"
+                          if not players.get('hidden_card') else '| # |'for z in range(0,len(current_hand))]),
                           "".rjust(15) , "  ".join([f"| {current_split[z][1]} |" for z in range(0,len(current_split)) if current_split]))
                     #if current_split:
                         #print("".rjust(6) , "  ".join([f"| {current_split[z][1]} |" for z in range(0,len(current_split))]))
                     middle_side_card=False
                     bottom_side_card=True
                 else:
-                    print(f"PLAYER {i} HAND: " , "  ".join([f"|__{current_hand[z][0]}|" for z in range(0,len(current_hand))]),
+                    print(f"PLAYER {i} HAND: " , " ".join([f"|__{current_hand[z][0]}|" 
+                          if not players.get('hidden_card') else '| # |' for z in range(0,len(current_hand))]),
                           f"PLAYER {i} SPLIT: " , " ".join([f"|__{current_split[z][0]}|" if current_split else "x" for z in range(0,len(current_split)) ]))
                     #if current_split:
                         #print("SPLIT: " , " ".join([f"|__{current_split[z][0]}|" for z in range(0,len(current_split))]))
@@ -257,17 +262,20 @@ def display_hands(players,players_turn=False,display_all=False):
 
             while top_side_card or middle_side_card or bottom_side_card:
                 if top_side_card:
-                    print("".rjust(15) , "  ".join([f"|{current_hand[z][0]}  |" for z in range(0,len(current_hand))]),
+                    print("".rjust(15) , "  ".join([f"|{current_hand[z][0]}  |" 
+                          if not players.get('hidden_card') else '|#  |' for z in range(0,len(current_hand))]),
                           "".rjust(15) , "  ".join([f"|{current_split[z][0]} |" for z in range(0,len(current_split)) if current_split]))
                     top_side_card = False
                     middle_side_card=True
                 elif middle_side_card:
-                    print("".rjust(15) , "  ".join([f"| {current_hand[z][1]} |" for z in range(0,len(current_hand))]),
+                    print("".rjust(15) , "  ".join([f"| {current_hand[z][1]} |"
+                          if not players.get('hidden_card') else '| # |'for z in range(0,len(current_hand))]),
                           "".rjust(15) , "  ".join([f"| {current_split[z][1]} |" for z in range(0,len(current_split)) if current_split]))
                     middle_side_card=False
                     bottom_side_card=True
                 else:
-                    print(f"PLAYER {players_turn} HAND: " , "  ".join([f"|__{current_hand[z][0]}|" for z in range(0,len(current_hand))]),
+                    print(f"PLAYER {players_turn} HAND: " , "  ".join([f"|__{current_hand[z][0]}|" 
+                          if not players.get('hidden_card') else '| # |' for z in range(0,len(current_hand))]),
                           f"PLAYER {players_turn} SPLIT: " , " ".join([f"|__{current_split[z][0]}|" if current_split else "x" for z in range(0,len(current_split)) ]))
                     bottom_side_card=False
 
