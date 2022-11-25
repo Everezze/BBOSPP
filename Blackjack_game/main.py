@@ -2,7 +2,6 @@ import random
 
 def main():
 
-    
     DIAMOND = chr(9830)
     SPADE = chr(9824)
     CLUB = chr(9827)
@@ -15,10 +14,6 @@ def main():
             numbr_of_players = int(z)
 
     PLAYERS_TURN = 1
-    #PLAYERS_NUMBER = [[],[]]
-    #PLAYERS_MONEY = {}
-    #PLAYERS_BET = [0]
-    #PLAYER_OPTIONS = ['(H)it','(S)tand']
     PLAYER_ADDITIONAL_OPTIONS = ['double','split','surrender']
     PLAYERS = {}
     deck = make_deck(DIAMOND,SPADE,CLUB,HEART)
@@ -35,25 +30,6 @@ def main():
             PLAYERS[i]['hand'].append(deck.pop())
             cards_to_distribute -=1
     PLAYERS[0]['hidden_card'] = True
-        #else:
-            #PLAYERS[i]['hand'] = []
-            #cards_to_distribute = 2
-            #while cards_to_distribute:
-                #PLAYERS[i]['hand'].append(deck.pop())
-                #cards_to_distribute -=1
-
-
-    #while len(PLAYER_HAND) < 2 :
-    #while len(PLAYERS_NUMBER[-1]) < 2:
-        #for player_hand in PLAYERS_NUMBER:
-            #player_hand.append(deck.pop(0))
-    #for i in range(0,numbr_of_players+1):
-        #if i:
-            #PLAYERS[i]['hand'] = []
-        #cards_to_distribute = 2
-        #while cards_to_distribute:
-            #PLAYERS[i]['hand'].append(deck.pop())
-            #cards_to_distribute -=1
 
     #print(PLAYERS)
     display_hands(PLAYERS,display_all=True)
@@ -61,7 +37,6 @@ def main():
     while PLAYERS_TURN:
         CURRENT_BET =get_bet(PLAYERS_TURN,PLAYERS)
         PLAYERS[PLAYERS_TURN]['bet'] = CURRENT_BET
-
 
         check_and_process_move(PLAYERS_TURN,PLAYERS,CURRENT_BET,deck,PLAYER_ADDITIONAL_OPTIONS)
         #print(f"Player\'s hand: {display_cards()}")
@@ -105,17 +80,13 @@ def main():
 def make_deck(*forms):
 
     deck= []
-    #print(deck)
-
     for symbol in forms:
         for value in range(2,11):
             deck.append((value,symbol))
         for prestige in ('J','Q','K','A'):
             deck.append((prestige, symbol))
     random.shuffle(deck)
-
     return deck
-    #print(deck)
 
 def get_bet(player_turn, players):
     while True:
@@ -140,9 +111,7 @@ def get_cards_value(hand):
                 total+=11
         else:
             total +=value
-
     return total
-
 
 def check_and_process_move(players_turn,players,current_bet,deck,player_additional_options):
 
@@ -176,11 +145,11 @@ def check_and_process_move(players_turn,players,current_bet,deck,player_addition
             break
         elif player_move.lower() in ('do','double','d') and 'double' in players[players_turn]['options']:
             #print(f"Player\'s hand: {display_cards()}")
-            display_hands(players, players_turn)
             if players[players_turn]['base_money'] >= current_bet * 2:
                 current_bet *=2
                 players[players_turn]['bet']= current_bet
                 players[players_turn]['hand'].append(deck.pop(0))
+            display_hands(players, players_turn)
             break
         elif player_move.lower() in ('sur','surrender') and 'surrender' in players[players_turn]['options']:
             players[players_turn]['base_money'] -= current_bet / 2
@@ -211,92 +180,107 @@ def check_and_process_move(players_turn,players,current_bet,deck,player_addition
 
 def display_hands(players,players_turn=False,display_all=False):
     #draw the cards with horizontal and vertical lines and add the motif and value of each card of the player's hand and split eventually
-    top_side_card=True
-    middle_side_card=False
-    bottom_side_card=False
+    top_line= []
+    top_side_card= [[],[]]
+    middle_side_card= [[],[]]
+    bottom_side_card= [[],[]]
+
     if display_all:
         for i in range(0,len(players)):
+            top_line =[]
+            top_side_card= [[],[]]
+            middle_side_card= [[],[]]
+            bottom_side_card= [[],[]]
             current_hand= players[i]['hand']
             current_split= players[i].get('split')
 
-            #no card drawing for split since there's none
-            #if not current_split:
-                #current_split =0
-
-            total_cards= len(current_hand) + (0 if not current_split else len(current_split))
-
-            #loop through each value and symbol (a card) and use these value for printing the card
-            #for value,symbol in current_hand:
-            #...
-            #if i ==0 and len(current_hand == 2):
-            print(" ___ ".rjust(21) + "  ___"*(total_cards-1))
-
-            while top_side_card or middle_side_card or bottom_side_card:
-                #print("|"+ f"{current_hand[drawing_component][0]  }")
-                if top_side_card:
-                    #print("|".rjust(7) + "{current_hand[drawing_component][0]}")
-                    #print("|".rjust(7) , ["{current_hand[z][0]}" for z in range(0,total_cards)])
-                    #print("".rjust(7) , "  ".join(["{current_hand[z][0]}  |" for z in range(0,total_cards)]))
-                    print("".rjust(15) , " ".join([f"|{current_hand[z][0]}  |"
-                          if not players[i].get('hidden_card') or players[i].get('hidden_card') and z!=0 else '|#  |' for z in range(0,len(current_hand))]),
-                          "".rjust(15) , "  ".join([f"|{current_split[z][0]}  |"
-                          for z in range(0,len(current_split) if current_split else 0) ]))
-                    #if current_split:
-                        #print("".rjust(6) , "  ".join([f"|{current_split[z][0]} |" for z in range(0,len(current_split))]))
-                    top_side_card = False
-                    middle_side_card=True
-                elif middle_side_card:
-                    print("".rjust(15) , " ".join([f"| {current_hand[z][1]} |"
-                          if not players[i].get('hidden_card') or players[i].get('hidden_card') and z!=0 else '| # |'for z in range(0,len(current_hand))]),
-                          "".rjust(15) , "  ".join([f"| {current_split[z][1]}  |" 
-                          for z in range(0,len(current_split) if current_split else 0) ]))
-
-                    #if current_split:
-                        #print("".rjust(6) , "  ".join([f"| {current_split[z][1]} |" for z in range(0,len(current_split))]))
-                    middle_side_card=False
-                    bottom_side_card=True
+#a,b,c,d corresponds to the different level of cards : respectively top line of card, top side, middle side, bottom side of a card
+#having this condition will allow to display correctly cards with 10 as a value
+            for z in range(0,len(current_hand)):
+                if len(str(current_hand[z][0])) > 1 and i!= 0 and z!=0:
+                    a= " ____ "
+                    c=f"| {current_hand[z][1]}  |"
                 else:
-                    print(f"PLAYER {i} HAND: " , " ".join([f"|__{current_hand[z][0]}|" 
-                          if not players[i].get('hidden_card') or players[i].get('hidden_card') and z!=0 else '|__#|' for z in range(0,len(current_hand))]),
-                          f"PLAYER {i} SPLIT: " , "  ".join([f"|__{current_split[z][0]}|"
-                          if current_split else "x" for z in range(0,len(current_split) if current_split else 5) ]))
-                    #if current_split:
-                        #print("SPLIT: " , " ".join([f"|__{current_split[z][0]}|" for z in range(0,len(current_split))]))
-                    bottom_side_card=False
-                    top_side_card = True
-                    break
-                    #top_side_card = True
-                    #break
+                    a= " ___ "
+                    c=f"| {current_hand[z][1]} |"
 
+                if not players[i].get('hidden_card') or players[i].get('hidden_card') and z!=0:
+                    top_line.append(a)
+                    top_side_card[0].append(f"|{current_hand[z][0]}  |")
+                    middle_side_card[0].append(c)
+                    bottom_side_card[0].append(f"|__{current_hand[z][0]}|")
+                else:
+                    top_line.append(a)
+                    top_side_card[0].append(f"|#  |")
+                    middle_side_card[0].append(f"| # |")
+                    bottom_side_card[0].append(f"|__#|")
+
+            for z in range(0,len(current_split) if current_split else 0):
+                if len(str(current_split[z][0])) > 1:
+                    a= " ____ "
+                    c=f"| {current_split[z][1]}  |"
+                else:
+                    a= " ___ "
+                    c=f"| {current_split[z][1]} |"
+
+                top_line.append(a)
+                top_side_card[1].append(f"|{current_split[z][0]}  |")
+                middle_side_card[1].append(c)
+                bottom_side_card[1].append(f"|__{current_split[z][0]}|")
+
+#print topside cards and their split if any, and do with middle and bottom also
+            print("".rjust(15), ' '.join(top_line))
+            print("".rjust(15) , ' '.join(top_side_card[0]),
+                  "".rjust(15) , ' '.join(top_side_card[1]) )
+
+            print("".rjust(15) , ' '.join(middle_side_card[0]),
+                  "".rjust(15) , ' '.join(middle_side_card[1]) )
+
+            print(f"Player {i} hand: " if i else "Dealer's hand: ", ' '.join(bottom_side_card[0]),
+                  f"Player {i} split: " if players[i].get('split') else '' , ' '.join(bottom_side_card[1]) )
     else:
             current_hand= players[players_turn]['hand']
             current_split= players[players_turn].get('split')
-            total_cards= len(current_hand) + (0 if not current_split else len(current_split))
 
-            print(" ___ ".rjust(21) + "  ___"*(total_cards-1) )
-
-            while top_side_card or middle_side_card or bottom_side_card:
-                if top_side_card:
-                    print("".rjust(15) , "  ".join([f"|{current_hand[z][0]}  |" 
-                          if not players[players_turn].get('hidden_card') or players[players_turn].get('hidden_card') and z!=0 else '|#  |' for z in range(0,len(current_hand))]),
-                          "".rjust(15) , "  ".join([f"|{current_split[z][0]} |" 
-                          for z in range(0,len(current_split) if current_split else 0) ]))
-                    top_side_card = False
-                    middle_side_card=True
-                elif middle_side_card:
-                    print("".rjust(15) , "  ".join([f"| {current_hand[z][1]} |"
-                          if not players[players_turn].get('hidden_card') or players[players_turn].get('hidden_card') and z!=0 else '| # |'for z in range(0,len(current_hand))]),
-                          "".rjust(15) , "  ".join([f"| {current_split[z][1]} |"
-                          for z in range(0,len(current_split) if current_split else 0) ]))
-                    middle_side_card=False
-                    bottom_side_card=True
+            for z in range(0,len(current_hand)):
+                if len(str(current_hand[z][0])) > 1 and players_turn!=0 and z!=0:
+                    a= " ____ "
+                    c=f"| {current_hand[z][1]}  |"
                 else:
-                    print(f"PLAYER {players_turn} HAND: " , "  ".join([f"|__{current_hand[z][0]}|" 
-                          if not players[players_turn].get('hidden_card') or players[players_turn].get('hidden_card') and z!=0 else '| # |' for z in range(0,len(current_hand))]),
-                          f"PLAYER {players_turn} SPLIT: " , " ".join([f"|__{current_split[z][0]}|"
-                          if current_split else "x" for z in range(0,len(current_split) if current_split else 5) ]))
-                    bottom_side_card=False
+                    a= " ___ "
+                    c=f"| {current_hand[z][1]} |"
 
+                if not players[players_turn].get('hidden_card') or players[players_turn].get('hidden_card') and z!=0:
+                    top_line.append(a)
+                    top_side_card[0].append(f"|{current_hand[z][0]}  |")
+                    middle_side_card[0].append(c)
+                    bottom_side_card[0].append(f"|__{current_hand[z][0]}|")
+                else:
+                    top_line.append(a)
+                    top_side_card[0].append(f"|#  |")
+                    middle_side_card[0].append(f"| # |")
+                    bottom_side_card[0].append(f"|__#|")
 
+            for z in range(0,len(current_split) if current_split else 0):
+                if len(str(current_split[z][0])) > 1:
+                    a= " ____ "
+                    c=f"| {current_split[z][1]}  |"
+                else:
+                    a= " ___ "
+                    c=f"| {current_split[z][1]} |"
+                top_line.append(a)
+                top_side_card[1].append(f"|{current_split[z][0]}  |")
+                middle_side_card[1].append(c)
+                bottom_side_card[1].append(f"|__{current_split[z][0]}|")
+
+            print("".rjust(15), ' '.join(top_line))
+            print("".rjust(15) , ' '.join(top_side_card[0]),
+                  "".rjust(15) , ' '.join(top_side_card[1]) )
+
+            print("".rjust(15) , ' '.join(middle_side_card[0]),
+                  "".rjust(15) , ' '.join(middle_side_card[1]) )
+
+            print(f"Player {players_turn} hand: " if players_turn else "Dealer's hand: ", ' '.join(bottom_side_card[0]),
+                  f"Player {players_turn} split: " if players[players_turn].get('split') else '' , ''.join(bottom_side_card[1]) )
 
 main()
