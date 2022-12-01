@@ -99,61 +99,87 @@ def get_bet(player_turn, players):
             print("Please insert a valid amount")
 
 def get_cards_value(hand):
-    total=0
-    for card in hand:
-        value = card[0]
-        if value in ('J','Q','K'):
-            total+=10
-        elif value == 'A':
-            if total + 11 > 21:
-                total +=1
-            else:
-                total+=11
+    #can go bust when not if cards not re-arranged, add all cards but ace and add ace at the end with either 1 or 11 as a value
+    regular_cards=[]
+    ace_cards=[]
+    for x in hand:
+        if x[0] not in ('J','Q','K','A'):
+            regular_cards.append(x[0])
+        elif x[0] in ('J','Q','K'):
+            regular_cards.append(10)
         else:
-            total +=value
+            ace_cards.append(x[0])
+
+    total = sum(regular_cards)
+    for ace in ace_cards:
+        if total + 11 <= 21:
+            total += 11
+        else:
+            total += 1
     return total
 
 def check_and_process_move(players_turn,players,current_bet,deck,player_additional_options):
+    hand_still_inplay= True
+    split_still_inplay= True if players[players_turn].get('split') else False
 
     while True:
+        if get_cards_value(players[players_turn]['hand'])>21 :
+            if hand_still_inplay and not players[players_turn].get('split'):
+                players[players_turn]['base_money'] -= current_bet
+                display_hands(players, players_turn)
+                print("Bust! You lost your bet,try another time")
+                break
+            elif hand_still_inplay and split_still_inplay:
+                players[players_turn]['base_money'] -= current_bet/2
+                hand_still_inplay= False
+            elif hand_still_inplay and not split_still_inplay:
+                players[players_turn]['base_money'] -= current_bet/2
+                break
+        if players[players_turn].get('split'):
+            if get_cards_value(players[players_turn]['split'])>21 :
+                if split_still_inplay and not hand_still_inplay:
+                    players[players_turn]['base_money'] -= current_bet/2
+                    break
+                elif split_still_inplay and hand_still_inplay:
+                    players[players_turn]['base_money'] -= current_bet/2
+                    split_still_inplay=False
 
-        if get_cards_value(players[players_turn]['hand'])>21:
-            display_hands(players, players_turn)
-            print("Bust! You lost your bet,try another time")
-            players[players_turn]['base_money'] -=  current_bet
-            break
-        
         # add player options and change accordingly
         #check player cards for double, split and surrender option
         if len(players[players_turn]['hand']) == 2:
             for option in player_additional_options:
-                if option == 'split' and len(set(list(zip(*players[players_turn]['hand']))[0])) !=1:
+                if option == 'split' and len(set(list(zip(*players[players_turn]['hand']))[0])) !=1 and current_bet*2 > players[players_turn]['base_money']:
+                    continue
+                if option== 'double' and current_bet*2 > players[players_turn]['base_money']:
                     continue
                 players[players_turn]['options'].append(option)
         else:
             players[players_turn]['options'] = [x for x in players[players_turn]['options'] if x not in player_additional_options]
 
-        print(f"Player {players_turn} turn. {', '.join([f'({x[0].upper()}){x[1:]}' for x in players[players_turn]['options']])}:")
+        print(f"Player {players_turn} turn. {', '.join([f'{x[0].upper()}{x[1:]}' for x in players[players_turn]['options']])}:")
         #{(x[0] for x in players[players_turn]['options'])}
         player_move= input("> ")
 
         if player_move.lower() in ('h','hit') and 'hit' in players[players_turn]['options']:
-            players[players_turn]['hand'].append(deck.pop(0))
+            if hand_still_inplay:
+                players[players_turn]['hand'].append(deck.pop(0))
+            if split_still_inplay:
+                players[players_turn]['split'].append(deck.pop(0))
             display_hands(players, players_turn)
+
             #print(f"Player\'s hand: {display_cards()}")
         elif player_move.lower() in ('st','stand','s') and 'stand' in players[players_turn]['options']:
             break
         elif player_move.lower() in ('do','double','d') and 'double' in players[players_turn]['options']:
             #print(f"Player\'s hand: {display_cards()}")
-            if players[players_turn]['base_money'] >= current_bet * 2:
-                current_bet *=2
-                players[players_turn]['bet']= current_bet
-                players[players_turn]['hand'].append(deck.pop(0))
+            current_bet *=2
+            players[players_turn]['bet']= current_bet
+            players[players_turn]['hand'].append(deck.pop(0))
             display_hands(players, players_turn)
             break
         elif player_move.lower() in ('sur','surrender') and 'surrender' in players[players_turn]['options']:
             players[players_turn]['base_money'] -= current_bet / 2
-            players[players_turn]['bet']= current_bet/2 #keep track of the bet to display how much he lost at the end
+            players[players_turn]['bet']= current_bet #keep track of the bet to display how much he lost at the end
             players[players_turn]['outcome']= 'lost'
             print(f"Player {players_turn}, you lost half of your bet by surrendering.")
             break
@@ -161,20 +187,14 @@ def check_and_process_move(players_turn,players,current_bet,deck,player_addition
             # add another hand to the player, either separately or in the  same hand
             #draw cards until len() ==2 for both hands
             # display hands with print(f"Player\'s hand: {display_cards()}")
-            if players[players_turn]['base_money'] >= current_bet * 2:
-                current_bet *=2
-                players[players_turn]['bet']= current_bet
-                players[players_turn]['split']= []
-                players[players_turn]['split'].append(players[players_turn]['hand'].pop())
-                players[players_turn]['hand'].append(deck.pop())
-                players[players_turn]['split'].append(deck.pop())
-                display_hands(players, players_turn)
-            else:
-                players[players_turn]['options'].remove('split')
-                print('Unfortunate! You could have split your hand if you had enough money to double your bet.')
-                print('Choose other option(s).')
+            current_bet *=2
+            players[players_turn]['bet']= current_bet
+            players[players_turn]['split']= []
+            players[players_turn]['split'].append(players[players_turn]['hand'].pop())
+            players[players_turn]['hand'].append(deck.pop())
+            players[players_turn]['split'].append(deck.pop())
+            display_hands(players, players_turn)
                 #...
-                
         else:
             print('Please insert a valid option.')
 
@@ -195,7 +215,7 @@ def display_hands(players,players_turn=False,display_all=False):
             current_split= players[i].get('split')
 
 #a,b,c,d corresponds to the different level of cards : respectively top line of card, top side, middle side, bottom side of a card
-#having this condition will allow to display correctly cards with 10 as a value
+#having this condition will allow to correctly display cards with 10 as a value
             for z in range(0,len(current_hand)):
                 if len(str(current_hand[z][0])) > 1 and i!= 0 and z!=0:
                     a= " ____ "
