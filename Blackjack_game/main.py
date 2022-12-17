@@ -10,8 +10,10 @@ def main():
     numbr_of_players= False
     while not numbr_of_players:
         z= input('how many players do you want in the game?(1-7): ')
-        if z.isnumeric and int(z) > 0 and int(z) < 8:
+        if z.isnumeric() and 0 < int(z) < 8:
             numbr_of_players = int(z)
+        else:
+            print('\nInsert a valid number of players.')
 
     PLAYERS_TURN = 1
     PLAYER_ADDITIONAL_OPTIONS = ['double','split','surrender']
