@@ -54,31 +54,68 @@ def main():
         PLAYERS[PLAYERS_TURN]['hand'].append(deck.pop(0))
 
     #print(f"Dealer\'s hand: {display_cards()}")
+    display_hands(PLAYERS,PLAYERS_TURN)
 
     if get_cards_value(PLAYERS[PLAYERS_TURN]['hand']) > 21:
         #display dealer's cards
-        #print(f'dealer busted!')
         for player in range(1,numbr_of_players+1):
-            if get_cards_value(PLAYERS[player]['hand']) <=21:
-                #display player hand and tell how much he earned
+            if PLAYERS[player].get('outcome'):
+                if PLAYERS[player]['outcome'] != 'lost':
+                    PLAYERS[player]['base_money'] += PLAYERS[player]['bet']/2
+            else:
                 PLAYERS[player]['base_money'] += PLAYERS[player]['bet']
                 PLAYERS[player]['outcome'] = 'won'
+        print(f'\nDealer busted!')
+        print(f"Here's the player(s) recap:\n")
+        sum_up_outcomes(PLAYERS, len(PLAYERS.keys()))
+
     else:
         for player in range(1,numbr_of_players+1):
-            if get_cards_value(PLAYERS[player]['hand']) <= 21 :
-                if get_cards_value(PLAYERS[player]['hand']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
-                    # pay the player bet 
-                    PLAYERS[player]['base_money'] += PLAYERS[player]['bet']
-                    PLAYERS[player]['outcome'] = 'won'
-                    #...
-                elif get_cards_value(PLAYERS[player]['hand']) < get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
-                    #get player money
-                    PLAYERS[player]['base_money'] -= PLAYERS[player]['bet']
-                    PLAYERS[player]['outcome'] = 'lost'
-                    #...
+            if PLAYERS[player].get('outcome'):
+                if PLAYERS[player]['outcome'] == 'handlost':
+                    if get_cards_value(PLAYERS[player]['split']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                        PLAYERS[player]['base_money'] += PLAYERS[player]['bet']/2
+                    else:
+                        PLAYERS[player]['base_money'] -= PLAYERS[player]['bet']/2
+                        PLAYERS[player]['outcome'] = 'lost'
+
+                if PLAYERS[player]['outcome'] == 'splitlost':
+                    if get_cards_value(PLAYERS[player]['hand']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                        PLAYERS[player]['base_money'] += PLAYERS[player]['bet']/2
+                    else:
+                        PLAYERS[player]['base_money'] -= PLAYERS[player]['bet']/2
+                        PLAYERS[player]['outcome'] = 'lost'
+            else:
+                if not PLAYERS[player].get('split'):
+                    if get_cards_value(PLAYERS[player]['hand']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                        PLAYERS[player]['base_money'] += PLAYERS[player]['bet']
+                        PLAYERS[player]['outcome'] = 'won'
+                    else:
+                        PLAYERS[player]['base_money'] -= PLAYERS[player]['bet']
+                        PLAYERS[player]['outcome'] = 'lost'
+                else:
+                    if get_cards_value(PLAYERS[player]['hand']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                        if get_cards_value(PLAYERS[player]['split']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                            PLAYERS[player]['base_money'] += PLAYERS[player]['bet']
+                            PLAYERS[player]['outcome'] = 'won'
+                        else:
+                            PLAYERS[player]['outcome'] = 'splitlost'
+                    elif get_cards_value(PLAYERS[player]['split']) > get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                        if get_cards_value(PLAYERS[player]['hand']) < get_cards_value(PLAYERS[PLAYERS_TURN]['hand']):
+                            PLAYERS[player]['outcome'] = 'handlost'
+                    else:
+                        PLAYERS[player]['base_money'] -= PLAYERS[player]['bet']
+                        PLAYERS[player]['outcome'] = 'lost'
+        #print(f'Dealer busted!')
+        #print(f"Here's the player(s) recap:")
+        #for each player check  the outcome key to determine if they lost, won or hand a 50/50
+        #for example: Player n: You lost hand but won split | Your balance : 1000 -> 1200 (+100, +100)
+        print(f"\nHere's the player(s) recap:\n")
+        sum_up_outcomes(PLAYERS, len(PLAYERS.keys()))
+
+    return PLAYERS
 
 def make_deck(*forms):
-
     deck= []
     for symbol in forms:
         for value in range(2,11):
@@ -126,30 +163,40 @@ def check_and_process_move(players_turn,players,current_bet,deck,player_addition
         if get_cards_value(players[players_turn]['hand'])>21 :
             if hand_still_inplay and not players[players_turn].get('split'):
                 players[players_turn]['base_money'] -= current_bet
-                display_hands(players, players_turn)
+                players[players_turn]['outcome']= 'lost'
                 print("Bust! You lost your bet,try another time")
                 break
             elif hand_still_inplay and split_still_inplay:
                 players[players_turn]['base_money'] -= current_bet/2
+                players[players_turn]['outcome']= 'handlost'
                 hand_still_inplay= False
             elif hand_still_inplay and not split_still_inplay:
                 players[players_turn]['base_money'] -= current_bet/2
+                players[players_turn]['outcome']= 'lost'
                 break
         if players[players_turn].get('split'):
             if get_cards_value(players[players_turn]['split'])>21 :
                 if split_still_inplay and not hand_still_inplay:
                     players[players_turn]['base_money'] -= current_bet/2
+                    players[players_turn]['outcome']= 'lost'
                     break
                 elif split_still_inplay and hand_still_inplay:
                     players[players_turn]['base_money'] -= current_bet/2
+                    players[players_turn]['outcome']= 'splitlost'
                     split_still_inplay=False
 
         # add player options and change accordingly
         #check player cards for double, split and surrender option
         if len(players[players_turn]['hand']) == 2:
             for option in player_additional_options:
-                if option == 'split' and len(set(list(zip(*players[players_turn]['hand']))[0])) !=1 and current_bet*2 > players[players_turn]['base_money']:
+                if option in players[players_turn]['options']:
                     continue
+                if option == 'split':
+                    if len(set(list(zip(*players[players_turn]['hand']))[0])) !=1 :
+                        continue
+                    else:
+                        if current_bet*2 > players[players_turn]['base_money']:
+                            continue
                 if option== 'double' and current_bet*2 > players[players_turn]['base_money']:
                     continue
                 players[players_turn]['options'].append(option)
@@ -179,7 +226,7 @@ def check_and_process_move(players_turn,players,current_bet,deck,player_addition
             break
         elif player_move.lower() in ('sur','surrender') and 'surrender' in players[players_turn]['options']:
             players[players_turn]['base_money'] -= current_bet / 2
-            players[players_turn]['bet']= current_bet #keep track of the bet to display how much he lost at the end
+            players[players_turn]['bet']= current_bet/2 #keep track of the bet to display how much he lost at the end
             players[players_turn]['outcome']= 'lost'
             print(f"Player {players_turn}, you lost half of your bet by surrendering.")
             break
@@ -217,9 +264,13 @@ def display_hands(players,players_turn=False,display_all=False):
 #a,b,c,d corresponds to the different level of cards : respectively top line of card, top side, middle side, bottom side of a card
 #having this condition will allow to correctly display cards with 10 as a value
             for z in range(0,len(current_hand)):
-                if len(str(current_hand[z][0])) > 1 and i!= 0 and z!=0:
-                    a= " ____ "
-                    c=f"| {current_hand[z][1]}  |"
+                if len(str(current_hand[z][0])) > 1:
+                    if not players[i].get('hidden_card') or players[i].get('hidden_card') and z!=0:
+                        a= " ____ "
+                        c=f"| {current_hand[z][1]}  |"
+                    else:
+                        a= " ___ "
+                        c=f"| {current_hand[z][1]} |"
                 else:
                     a= " ___ "
                     c=f"| {current_hand[z][1]} |"
@@ -263,9 +314,13 @@ def display_hands(players,players_turn=False,display_all=False):
             current_split= players[players_turn].get('split')
 
             for z in range(0,len(current_hand)):
-                if len(str(current_hand[z][0])) > 1 and players_turn!=0 and z!=0:
-                    a= " ____ "
-                    c=f"| {current_hand[z][1]}  |"
+                if len(str(current_hand[z][0])) > 1:
+                    if not players[players_turn].get('hidden_card') or players[players_turn].get('hidden_card') and z!=0:
+                        a= " ____ "
+                        c=f"| {current_hand[z][1]}  |"
+                    else:
+                        a= " ___ "
+                        c=f"| {current_hand[z][1]} |"
                 else:
                     a= " ___ "
                     c=f"| {current_hand[z][1]} |"
@@ -303,4 +358,62 @@ def display_hands(players,players_turn=False,display_all=False):
             print(f"Player {players_turn} hand: " if players_turn else "Dealer's hand: ", ' '.join(bottom_side_card[0]),
                   f"Player {players_turn} split: " if players[players_turn].get('split') else '' , ''.join(bottom_side_card[1]) )
 
-main()
+def sum_up_outcomes(players, numbr_of_players):
+
+    for player in range(1,numbr_of_players):
+        if players[player]['outcome'] == 'handlost':
+            print(
+                f"Player {player}:",
+                "You lost your hand bet but won your split bet | Your balance:",
+                f"{players[player]['base_money']} -> {players[player]['base_money']}",
+                f"(-{players[player]['bet']/2},+{players[player]['bet']/2})"
+            )
+        elif players[player]['outcome'] == 'splitlost':
+            print(
+                f"Player {player}:",
+                "You won your hand bet but lost your split bet | Your balance:",
+                f"{players[player]['base_money']} -> {players[player]['base_money']}",
+                f"(+{players[player]['bet']/2},-{players[player]['bet']/2})"
+            )
+        elif players[player]['outcome'] == 'won':
+            print(
+                f"Player {player}:",
+                "You won both your hand and split bets |" if players[player].get('split') else "You won your hand bet |",
+                "Your balance:",
+                f"{players[player]['base_money'] - players[player]['bet']} -> {players[player]['base_money']}",
+                f"(+{players[player]['bet']})"
+            )
+        else:
+            print(
+                f"Player {player}:",
+                "You lost both your hand and split bets |" if players[player].get('split') else "You lost your hand bet |",
+                "Your balance:",
+                f"{players[player]['base_money'] + players[player]['bet']} -> {players[player]['base_money']}",
+                f"(-{players[player]['bet']})"
+            )
+
+all_players = main()
+while True:
+    print("\n\nType 'help'(or h) for command help.")
+    action= input("What do you want to do? (look hand(s), replay, the sum up, bring help or quit.)\n> ")
+    action = action.strip()
+    if action == "dall":
+        display_hands(all_players, display_all=True)
+    elif action in [f"d{x}".strip() for x in all_players.keys()]:
+        display_hands(all_players, int(action[-1]))
+    elif action in ("replay","rep"):
+        all_players = main()
+    elif action in ("sumup","su"):
+        sum_up_outcomes(all_players, len(all_players.keys()))
+    elif action in ("help","h"):
+        print("Welcome to the brief help command, here are the commands you can type:")
+        print(" dall : displays all the cards of all players\n",
+              "d{1,2,..,n} : display all the cards of the n player\n",
+              "replay or rep : to play again\n",
+              "sumup or su : to sum up the losses and wins for each player\n",
+              "help or h : to display this help section\n",
+              "quit or q : to quit this game")
+    elif action in ("quit","q"):
+        break
+    else:
+        print("Please insert a valid option.")
