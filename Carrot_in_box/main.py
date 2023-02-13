@@ -4,7 +4,7 @@ def main():
     BOX_STRUCTURES = {
             "opened":{
                 "won": {
-                    0:"   0VV0",
+                    0:"   0VV0 ",
                     1:"  |2VV2|",
                     2:"  |2VV2|",
                     3:"  |0||0|",
@@ -12,10 +12,10 @@ def main():
                     5:"+11+ |",
                     6:"|  3  | |",
                     7:"|242| /",
-                    8:"+11+/",
+                    8:"+11+/ ",
                     },
                 "lost": {
-                    0:"   00",
+                    0:"   00 ",
                     1:"  |2  2|",
                     2:"  |2  2|",
                     3:"  |0__0|",
@@ -23,16 +23,16 @@ def main():
                     5:"+11+ |",
                     6:"|  3  | |",
                     7:"|242| /",
-                    8:"+11+/",
+                    8:"+11+/ ",
                     }
                 },
             "closed": {
-                    0:"  00",
+                    0:"  00 ",
                     1:" /2  2/|",
                     2:"+11+ |",
                     3:"|  3  | |",
                     4:"|242| /",
-                    5:"+11+/",
+                    5:"+11+/ ",
                 },
             "motifs": {
                 0:"_",
@@ -41,7 +41,7 @@ def main():
                 }
             }
 
-    COLORS= ["BROWN","ORANGE"]
+    COLORS= ["JOWEJFSDFLSWOENC","DKLFJWOE"]
     PLAYERS={}
 
     for i in range(1,3):
@@ -61,9 +61,42 @@ def main():
     #print(boxes["closed"])
     assign_boxes(PLAYERS,BOX_STRUCTURES)
     #print(*players[1]["box"], sep="\n")
-    print(*PLAYERS[1]["box"]["opened"],sep="\n")
-    print(*PLAYERS[1]["box"]["closed"],sep="\n")
+    #print(*PLAYERS[1]["box"]["opened"],sep="\n")
+    #print(*PLAYERS[1]["box"]["closed"],sep="\n")
+    print("\nHere are two boxes:")
+    for line in range(len(PLAYERS[1]["box"]["closed"])):
+        for k in PLAYERS:
+            print(PLAYERS[k]["box"]["closed"][line],end="  ")
+        print("\n",end="")
 
+    for player in PLAYERS:
+        print(f"{PLAYERS[player]['name']}, you have a {PLAYERS[player]['color']} box in front of you.")
+    input(f"When {PLAYERS[2]['name']} has closed their eyes, press Enter...")
+    print(f"{PLAYERS[1]['name']} here is the inside of your box:\n")
+    print(*PLAYERS[1]["box"]["opened"],sep="\n")
+    input("Press Enter to continue...")
+    print("\n"*40)
+    print(f"{PLAYERS[1]['name']} tell {PLAYERS[2]['name']} to open their eyes.")
+    print(f"{PLAYERS[1]['name']} tell {PLAYERS[2]['name']} what's in your box (lies allowed :D)")
+    input("Press Enter to continue...")
+    player_answer = input(f"{PLAYERS[2]['name']}, do you want to swap boxes? [Y/N]").strip().lower()
+    while player_answer not in ("n","no","yes ","y"):
+        player_answer= input("Wrong choice! do you want to swap or not ?[Y/N]\n> ")
+
+    if player_answer in ("yes","y","ye"):
+        if PLAYERS[1]["winning"]:
+            PLAYERS[1]["winning"] = False
+            PLAYERS[2]["winning"] = True
+        else:
+            PLAYERS[1]["winning"] = True
+            PLAYERS[2]["winning"] = False
+        assign_boxes(PLAYERS,BOX_STRUCTURES)
+    input("Press Enter to reveal the winner...")
+    for line in range(len(PLAYERS[1]["box"]["opened"])):
+        for k in PLAYERS:
+            print(PLAYERS[k]["box"]["opened"][line],end="  ")
+        print("\n",end="")
+    print(f"\n{PLAYERS[1]['name'] if PLAYERS[1]['winning'] else PLAYERS[2]['name']} HAS WON !!!")
 
 def get_name(players, player_number):
     player_name= input(f"Player {player_number} give me your name: ").strip()
@@ -84,8 +117,8 @@ def assign_boxes(players,box_structures,opened_box=False):
         if players[i]["winning"]:
             for component in box_structures["opened"]["won"].values():
                 BASE_CHARS = len([x for x in component if not x.isnumeric()])
-                if component == box_structures["opened"]["won"][0]:
-                    BASE_CHARS +=1
+                #if component == box_structures["opened"]["won"][0]:
+                    #BASE_CHARS +=1
                 CHARS_TO_SUBSTITUTE = MAX_WIDTH - BASE_CHARS
                 altered_component = component
                 if "3" in component:
@@ -108,8 +141,8 @@ def assign_boxes(players,box_structures,opened_box=False):
                     if component == box_structures["opened"]["won"][4]:
                         left_side_chars +=1
                         right_side_chars-=1
-                if component == box_structures["opened"]["won"][len(box_structures["opened"]["won"])-1]:
-                    right_side_chars -=1
+                #if component == box_structures["opened"]["won"][len(box_structures["opened"]["won"])-1]:
+                    #right_side_chars -=1
                 #if players[i] == players[1]:
                     #print(f"max_width: {MAX_WIDTH}")
                     #print(f"base chars: {base_chars}")
@@ -134,8 +167,8 @@ def assign_boxes(players,box_structures,opened_box=False):
         else:
             for component in box_structures["opened"]["lost"].values():
                 BASE_CHARS = len([x for x in component if not x.isnumeric()])
-                if component == box_structures["opened"]["lost"][0]:
-                    BASE_CHARS +=1
+                #if component == box_structures["opened"]["lost"][0]:
+                    #BASE_CHARS +=1
                 CHARS_TO_SUBSTITUTE = MAX_WIDTH - BASE_CHARS
                 altered_component = component
                 if "3" in component:
@@ -153,8 +186,8 @@ def assign_boxes(players,box_structures,opened_box=False):
                 else:
                     left_side_chars = CHARS_TO_SUBSTITUTE//2
                     right_side_chars = CHARS_TO_SUBSTITUTE//2
-                if component == box_structures["opened"]["won"][len(box_structures["opened"]["won"])-1]:
-                    right_side_chars -=1
+                #if component == box_structures["opened"]["won"][len(box_structures["opened"]["won"])-1]:
+                    #right_side_chars -=1
                 #if players[i] == players[1]:
                     #print(f"max_width: {MAX_WIDTH}")
                     #print(f"base chars: {BASE_CHARS}")
@@ -179,8 +212,8 @@ def assign_boxes(players,box_structures,opened_box=False):
 
         for component in box_structures["closed"].values():
             BASE_CHARS = len([x for x in component if not x.isnumeric()])
-            if component == box_structures["closed"][0]:
-                BASE_CHARS +=1
+            #if component == box_structures["closed"][0]:
+                #BASE_CHARS +=1
             CHARS_TO_SUBSTITUTE = MAX_WIDTH - BASE_CHARS
             altered_component = component
             if "3" in component:
@@ -198,8 +231,8 @@ def assign_boxes(players,box_structures,opened_box=False):
             else:
                 left_side_chars = CHARS_TO_SUBSTITUTE//2
                 right_side_chars = CHARS_TO_SUBSTITUTE//2
-            if component == box_structures["opened"]["won"][len(box_structures["opened"]["won"])-1]:
-                right_side_chars -=1
+            #if component == box_structures["opened"]["won"][len(box_structures["opened"]["won"])-1]:
+                #right_side_chars -=1
             #if players[i] == players[1]:
                 #print(f"max_width: {MAX_WIDTH}")
                 #print(f"base chars: {base_chars}")
