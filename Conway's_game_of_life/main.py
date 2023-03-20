@@ -2,16 +2,24 @@ import random
 def main():
     previous_grid = []
     number_of_neighbors= 0
+    WIDTH= 50
+    HEIGHT= 10
+    PREVIOUS_CYCLE_TITLE = "Latest Life Cycle"
+    CURRENT_CYCLE_TITLE = "Current Life Cycle"
+    offset = "".rjust((WIDTH-len(PREVIOUS_CYCLE_TITLE)//2 ) + len(PREVIOUS_CYCLE_TITLE))
 
-    for i in range(3):
+    for i in range(HEIGHT):
         previous_grid.append([])
     for row in previous_grid:
-        while len(row)<5:
+        while len(row)<WIDTH:
             row.append("O" if random.randint(0,1) else " ")
     #print(*previous_grid,sep="\n")
+    print(PREVIOUS_CYCLE_TITLE.rjust(((WIDTH-len(PREVIOUS_CYCLE_TITLE))//2 ) + len(PREVIOUS_CYCLE_TITLE)))
+    print(" ","_"*WIDTH,sep="")
     for row in previous_grid:
-        print(*row,sep="")
-    print("initial grid")
+        print("|",*row,"|",sep="")
+    print(" ","-"*WIDTH,sep="")
+    #print("\n"*2)
     #print("end of initial grid\n")
     editable_grid = [x[:] for x in previous_grid]
     #print("id of editable_grid:",id(editable_grid),"id of previous grid",id(previous_grid))
@@ -50,8 +58,11 @@ def main():
 
     previous_grid = [x[:] for x in editable_grid]
     #print(*editable_grid,sep="")
+    print("\n",CURRENT_CYCLE_TITLE.rjust(((WIDTH-len(CURRENT_CYCLE_TITLE))//2 ) + len(CURRENT_CYCLE_TITLE)))
+    print(" ","_"*WIDTH,sep="")
     for row in previous_grid:
-        print(*row,sep="")
+        print("|",*row,"|",sep="")
+    print(" ","-"*WIDTH,sep="")
 
 def count_neighbors(current_row,top_row,bottom_row,cell_index,first_cell=False,last_cell=False):
     number_of_neighbors = 0
