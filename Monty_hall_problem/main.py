@@ -19,7 +19,6 @@ def main():
             "|   o  |  ",
             "+------+  ",
                ]
-
     FACE_DOWN_CARD = [
             "+------+  ",
             "|      |  ",
@@ -29,6 +28,11 @@ def main():
             "|      |  ",
             "+------+  ",
                 ]
+    games_won_with_swap = 0
+    games_won_without_swap = 0
+    games_lost_with_swap = 0
+    games_lost_without_swap = 0
+    total_games = 0
 
     while True:
         CARDS_TRUTHINESS = [True,False,False]
@@ -83,9 +87,13 @@ def main():
             if swap_choice in ("y","yes","YES"):
                 print(f"You swapped door n°{random_losing_card} for door n°{chosen_card} and...")
                 print("You lost! How unfortunate...:\\")
+                games_lost_with_swap +=1
+                total_games +=1
             else:
                 print("You chose to not swap and...")
                 print(f"You won! The car is in the door n°{chosen_card}, Congratulations!")
+                games_won_without_swap +=1
+                total_games +=1
         else: 
             draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD, USER_CARD = chosen_card,**{"pick":False,"hint":True,"reveal":False})
             while True:
@@ -105,12 +113,22 @@ def main():
             if swap_choice in ("y","yes","YES"):
                 print(f"You swapped door n°{CARDS_VALUES['car_index']} for door n°{chosen_card} and...")
                 print(f"You won! The car is in the door n°{chosen_card}, Congratulations!")
+                games_won_with_swap +=1
+                total_games +=1
             else:
                 print("You chose to not swap and...")
                 print("You lost! How unfortunate...:\\")
+                games_lost_without_swap +=1
+                total_games +=1
+
+        print(f"\nWon with swapping : {games_won_with_swap}({round(games_won_with_swap/total_games*100,2)}%)")
+        print(f"Won without swapping : {games_won_without_swap}({round(games_won_without_swap/total_games*100,2)}%)")
+        print(f"Lost with swapping : {games_lost_with_swap}({round(games_lost_with_swap/total_games*100,2)}%)")
+        print(f"Lost without swapping : {games_lost_without_swap}({round(games_lost_without_swap/total_games*100,2)}%)")
+        print(f"Total games : {total_games}")
 
         while True:
-            replay = input("Do you to play again?[Y/N]").strip()
+            replay = input("Do you want to play again?[Y/N]").strip()
             if replay.isalpha():
                 if replay in ("y","yes","YES"):
                     break
@@ -159,6 +177,7 @@ def draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,
                         print(GOAT_CARD[line],end="")
                 print()
             print(f"The car is either behind door n°{USER_CARD} or door n°{random_losing_card}")
+            return random_losing_card
         else:
             for line in range(CARD_HEIGHT):
                 for card in range(1,len(CARDS_VALUES)):
