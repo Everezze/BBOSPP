@@ -30,84 +30,98 @@ def main():
             "+------+  ",
                 ]
 
-    CARDS_TRUTHINESS = [True,False,False]
-    random.shuffle(CARDS_TRUTHINESS)
-    CARDS_VALUES = {
-            1:False,
-            2:False,
-            3:False
-            }
-
-    for card in CARDS_VALUES:
-        #print(CARDS[card])
-        CARDS_VALUES[card] = CARDS_TRUTHINESS.pop(0)
-        if CARDS_VALUES[card]:
-            card_index = card
-        #draw_card(card)
-    #print(CARDS)
-    CARDS_VALUES["car_index"] = card_index
-    draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,**{"pick":True,"hint":False,"reveal":False})
-
-    chosen_card = False
     while True:
-        chosen_card = input("Pick door 1,2 or 3 ?: ").strip()
-        if chosen_card.isdecimal():
-            if int(chosen_card) >= len(CARDS_VALUES):
-                print("Error: number is bigger than number of doors.")
-                continue
-            elif int(chosen_card) <=0:
-                print("Error: number must be bigger than 0.")
-                continue
-            else:
-                chosen_card = int(chosen_card)
-                break
-        print("Only digits allowed.")
+        CARDS_TRUTHINESS = [True,False,False]
+        random.shuffle(CARDS_TRUTHINESS)
+        CARDS_VALUES = {
+                1:False,
+                2:False,
+                3:False
+                }
 
-    if chosen_card == CARDS_VALUES["car_index"]:
-        random_losing_card = draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD, USER_CARD = chosen_card,**{"pick":False,"hint":True,"reveal":False})
+        for card in CARDS_VALUES:
+            #print(CARDS[card])
+            CARDS_VALUES[card] = CARDS_TRUTHINESS.pop(0)
+            if CARDS_VALUES[card]:
+                card_index = card
+            #draw_card(card)
+        #print(CARDS)
+        CARDS_VALUES["car_index"] = card_index
+        draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,**{"pick":True,"hint":False,"reveal":False})
+
+        chosen_card = False
         while True:
-            swap_choice = input("Do you want to swap doors?(Y/N): ").strip()
-            if swap_choice.isalpha():
-                if swap_choice in ("y","yes","YES"):
-                    chosen_card,random_losing_card = random_losing_card,chosen_card
+            chosen_card = input("Pick door 1,2 or 3 ?: ").strip()
+            if chosen_card.isdecimal():
+                if int(chosen_card) >= len(CARDS_VALUES):
+                    print("Error: number is bigger than number of doors.")
+                    continue
+                elif int(chosen_card) <=0:
+                    print("Error: number must be bigger than 0.")
+                    continue
+                else:
+                    chosen_card = int(chosen_card)
                     break
-                elif swap_choice in ("n","no","NO"):
+            print("Only digits allowed.")
+
+        if chosen_card == CARDS_VALUES["car_index"]:
+            random_losing_card = draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD, USER_CARD = chosen_card,**{"pick":False,"hint":True,"reveal":False})
+            while True:
+                swap_choice = input("Do you want to swap doors?(Y/N): ").strip()
+                if swap_choice.isalpha():
+                    if swap_choice in ("y","yes","YES"):
+                        chosen_card,random_losing_card = random_losing_card,chosen_card
+                        break
+                    elif swap_choice in ("n","no","NO"):
+                        break
+                    else:
+                        print("Answer by YES(yes,y)/NO(n,no).")
+                else:
+                    print("Only letters allowed, answer by yes or no.")
+            draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,
+                      USER_CARD = chosen_card,**{"pick":False,"hint":False,"reveal":True})
+            if swap_choice in ("y","yes","YES"):
+                print(f"You swapped door n°{random_losing_card} for door n°{chosen_card} and...")
+                print("You lost! How unfortunate...:\\")
+            else:
+                print("You chose to not swap and...")
+                print(f"You won! The car is in the door n°{chosen_card}, Congratulations!")
+        else: 
+            draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD, USER_CARD = chosen_card,**{"pick":False,"hint":True,"reveal":False})
+            while True:
+                swap_choice = input("Do you want to swap doors?(Y/N): ").strip()
+                if swap_choice.isalpha():
+                    if swap_choice in ("y","yes","YES"):
+                        chosen_card,CARDS_VALUES["car_index"] = CARDS_VALUES["car_index"],chosen_card
+                        break
+                    elif swap_choice in ("n","no","NO"):
+                        break
+                    else:
+                        print("Answer by YES(yes,y)/NO(n,no).")
+                else:
+                    print("Only letters allowed, answer by yes or no.")
+            draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,
+                      USER_CARD = chosen_card,**{"pick":False,"hint":False,"reveal":True})
+            if swap_choice in ("y","yes","YES"):
+                print(f"You swapped door n°{CARDS_VALUES['car_index']} for door n°{chosen_card} and...")
+                print(f"You won! The car is in the door n°{chosen_card}, Congratulations!")
+            else:
+                print("You chose to not swap and...")
+                print("You lost! How unfortunate...:\\")
+
+        while True:
+            replay = input("Do you to play again?[Y/N]").strip()
+            if replay.isalpha():
+                if replay in ("y","yes","YES"):
+                    break
+                elif replay in ("n","no","NO"):
                     break
                 else:
-                    print("Answer by YES(yes,y)/NO(n,no).")
+                    print("Please,answer only by Yes or No.")
             else:
-                print("Only letters allowed, answer by yes or no.")
-        draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,
-                  USER_CARD = chosen_card,**{"pick":False,"hint":False,"reveal":True})
-        if swap_choice in ("y","yes","YES"):
-            print(f"You swapped door n°{random_losing_card} for door n°{chosen_card} and...")
-            print("You lost! How unfortunate...:\\")
-        else:
-            print("You chose to not swap and...")
-            print(f"You won! The car is in the door n°{chosen_card}, Congratulations!")
-    else: 
-        draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD, USER_CARD = chosen_card,**{"pick":False,"hint":True,"reveal":False})
-        while True:
-            swap_choice = input("Do you want to swap doors?(Y/N): ").strip()
-            if swap_choice.isalpha():
-                if swap_choice in ("y","yes","YES"):
-                    chosen_card,CARDS_VALUES["car_index"] = CARDS_VALUES["car_index"],chosen_card
-                    break
-                elif swap_choice in ("n","no","NO"):
-                    break
-                else:
-                    print("Answer by YES(yes,y)/NO(n,no).")
-            else:
-                print("Only letters allowed, answer by yes or no.")
-        draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,
-                  USER_CARD = chosen_card,**{"pick":False,"hint":False,"reveal":True})
-        if swap_choice in ("y","yes","YES"):
-            print(f"You swapped door n°{CARDS_VALUES['car_index']} for door n°{chosen_card} and...")
-            print(f"You won! The car is in the door n°{chosen_card}, Congratulations!")
-        else:
-            print("You chose to not swap and...")
-            print("You lost! How unfortunate...:\\")
-
+                print("Only letters allowed.")
+        if replay in ("n","no","NO"):
+            break
 
 def draw_card(CARDS_VALUES,GOAT_CARD,CAR_CARD,FACE_DOWN_CARD,
               USER_CARD = False,**STAGE_OF_GAME):
